@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消防知识在线刷题系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn.active {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .quiz-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .question-number {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .options {
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .option.selected {
+            background-color: #e8f4fd;
+            border-color: #3498db;
+        }
+        
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .stats {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .stats h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+        
+        .explanation.show {
+            display: block;
+        }
+        
+        .wrong-questions {
+            margin-top: 20px;
+        }
+        
+        .wrong-question {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>消防知识在线刷题系统</h1>
+            <div class="subtitle">400道消防相关题目，助您掌握消防知识</div>
+        </header>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" id="practiceMode">练习模式</button>
+            <button class="mode-btn" id="examMode">模拟考试</button>
+            <button class="mode-btn" id="reviewMode">错题回顾</button>
+        </div>
+        
+        <div class="quiz-container">
+            <div class="question-header">
+                <div class="question-number">题目 #<span id="currentQuestion">1</span>/<span id="totalQuestions">400</span></div>
+                <div class="question-type">题型: <span id="questionType">多选题</span></div>
+            </div>
+            
+            <div class="question-text" id="questionText">
+                376.疏散楼梯间应符合下列哪些规定？（  ）
+            </div>
+            
+            <div class="options" id="optionsContainer">
+                <div class="option" data-value="A">A.应能天然采光和自然通风，并宜靠外墙设置</div>
+                <div class="option" data-value="B">B.不应有疏散的凸出物或其他障碍物</div>
+                <div class="option" data-value="C">C.公共建筑的楼梯间内不应设置可燃气体管道</div>
+                <div class="option" data-value="D">D.不应设置烧水间、可燃材料储藏室、垃圾道</div>
+            </div>
+            
+            <div class="explanation" id="explanation">
+                <strong>解析：</strong> 疏散楼梯间的设计应满足安全疏散要求，以上选项均为疏散楼梯间应遵守的规定。
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-secondary" id="prevBtn">上一题</button>
+                <button class="btn btn-primary" id="submitBtn">提交答案</button>
+                <button class="btn btn-success" id="nextBtn">下一题</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <h3>答题统计</h3>
+            <div class="stat-item">
+                <span>已答题数:</span>
+                <span id="answeredCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>正确率:</span>
+                <span id="correctRate">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div class="wrong-questions" id="wrongQuestionsContainer" style="display: none;">
+            <h3>错题集</h3>
+            <!-- 错题将在这里动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 示例题库数据（实际应用中应包含全部400道题）
+        const questions = [
+            {
+                id: 376,
+                text: "疏散楼梯间应符合下列哪些规定？（  ）",
+                options: [
+                    "A.应能天然采光和自然通风，并宜靠外墙设置",
+                    "B.不应有疏散的凸出物或其他障碍物",
+                    "C.公共建筑的楼梯间内不应设置可燃气体管道",
+                    "D.不应设置烧水间、可燃材料储藏室、垃圾道"
+                ],
+                answer: "ABCD",
+                type: "多选题",
+                explanation: "疏散楼梯间的设计应满足安全疏散要求，以上选项均为疏散楼梯间应遵守的规定。"
+            },
+            {
+                id: 377,
+                text: "下列（  ） 属于一类高层建筑。",
+                options: [
+                    "A.建筑高度超过50m的商住楼",
+                    "B.建筑高度超过50m的教学楼",
+                    "C.藏书80万册的图书馆",
+                    "D.省级高层广播电视楼"
+                ],
+                answer: "ABD",
+                type: "多选题",
+                explanation: "根据《建筑设计防火规范》，一类高层建筑包括建筑高度超过50m的商住楼、教学楼以及省级高层广播电视楼。"
+            },
+            {
+                id: 378,
+                text: "下列哪些建筑的室内消火栓系统应设置水泵接合器？（ ）",
+                options: [
+                    "A.地上6层，建筑高度20m的办公楼",
+                    "B.地上3层，建筑高度15m，建筑面积12000㎡的商业楼",
+                    "C.地下1层，埋深12m，建筑面积9000㎡的商场",
+                    "D.地上6层，建筑高度25m的医院"
+                ],
+                answer: "AD",
+                type: "多选题",
+                explanation: "根据规范，建筑高度超过24m的医院和地上6层的办公楼应设置水泵接合器。"
+            },
+            // 这里可以继续添加更多题目...
+            {
+                id: 395,
+                text: "消防工作的基本方针为（）。",
+                options: [
+                    "A.预防为主",
+                    "B.先防后消",
+                    "C.先消后防",
+                    "D.防消结合"
+                ],
+                answer: "AD",
+                type: "多选题",
+                explanation: "消防工作的基本方针是'预防为主，防消结合'。"
+            }
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let wrongQuestions = [];
+        let mode = 'practice';
+
+        // DOM元素
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const currentQuestionSpan = document.getElementById('currentQuestion');
+        const totalQuestionsSpan = document.getElementById('totalQuestions');
+        const questionTypeSpan = document.getElementById('questionType');
+        const explanationDiv = document.getElementById('explanation');
+        const prevBtn = document.getElementById('prevBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const answeredCountSpan = document.getElementById('answeredCount');
+        const correctRateSpan = document.getElementById('correctRate');
+        const progressBar = document.getElementById('progressBar');
+        const wrongQuestionsContainer = document.getElementById('wrongQuestionsContainer');
+        const practiceModeBtn = document.getElementById('practiceMode');
+        const examModeBtn = document.getElementById('examMode');
+        const reviewModeBtn = document.getElementById('reviewMode');
+
+        // 初始化
+        function init() {
+            totalQuestionsSpan.textContent = questions.length;
+            loadQuestion(currentQuestionIndex);
+            updateStats();
+            
+            // 添加事件监听器
+            prevBtn.addEventListener('click', goToPreviousQuestion);
+            nextBtn.addEventListener('click', goToNextQuestion);
+            submitBtn.addEventListener('click', submitAnswer);
+            
+            practiceModeBtn.addEventListener('click', () => switchMode('practice'));
+            examModeBtn.addEventListener('click', () => switchMode('exam'));
+            reviewModeBtn.addEventListener('click', () => switchMode('review'));
+        }
+
+        // 加载题目
+        function loadQuestion(index) {
+            const question = questions[index];
+            
+            questionText.textContent = `${question.id}.${question.text}`;
+            questionTypeSpan.textContent = question.type;
+            currentQuestionSpan.textContent = index + 1;
+            
+            // 清空选项容器
+            optionsContainer.innerHTML = '';
+            
+            // 添加选项
+            question.options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.value = option.charAt(0); // A, B, C, D
+                
+                // 检查是否已经回答过此题
+                if (userAnswers[question.id]) {
+                    const userAnswer = userAnswers[question.id];
+                    if (userAnswer.includes(option.charAt(0))) {
+                        optionElement.classList.add('selected');
+                    }
+                }
+                
+                optionElement.addEventListener('click', () => selectOption(optionElement));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // 重置解析显示
+            explanationDiv.classList.remove('show');
+            
+            // 更新按钮状态
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === questions.length - 1;
+            
+            // 如果已经回答过此题，显示解析
+            if (userAnswers[question.id]) {
+                showAnswer(question);
+            }
+        }
+
+        // 选择选项
+        function selectOption(optionElement) {
+            if (mode === 'exam' && userAnswers[questions[currentQuestionIndex].id]) {
+                return; // 考试模式下已回答的题目不能修改
+            }
+            
+            const question = questions[currentQuestionIndex];
+            const optionValue = optionElement.dataset.value;
+            
+            if (question.type === '多选题') {
+                // 多选逻辑
+                optionElement.classList.toggle('selected');
+            } else {
+                // 单选逻辑
+                const options = optionsContainer.querySelectorAll('.option');
+                options.forEach(opt => opt.classList.remove('selected'));
+                optionElement.classList.add('selected');
+            }
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedOptions = optionsContainer.querySelectorAll('.option.selected');
+            
+            if (selectedOptions.length === 0) {
+                alert('请至少选择一个选项！');
+                return;
+            }
+            
+            // 获取用户答案
+            const userAnswer = Array.from(selectedOptions)
+                .map(opt => opt.dataset.value)
+                .sort()
+                .join('');
+            
+            // 保存用户答案
+            userAnswers[question.id] = userAnswer;
+            
+            // 显示答案和解析
+            showAnswer(question);
+            
+            // 更新统计
+            updateStats();
+        }
+
+        // 显示答案
+        function showAnswer(question) {
+            const userAnswer = userAnswers[question.id];
+            const correctAnswer = question.answer;
+            
+            // 标记正确和错误选项
+            const options = optionsContainer.querySelectorAll('.option');
+            options.forEach(option => {
+                const optionValue = option.dataset.value;
+                
+                if (correctAnswer.includes(optionValue)) {
+                    option.classList.add('correct');
+                } else if (userAnswer.includes(optionValue)) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // 显示解析
+            explanationDiv.textContent = `解析：${question.explanation}`;
+            explanationDiv.classList.add('show');
+            
+            // 如果答案错误，添加到错题集
+            if (userAnswer !== correctAnswer && !wrongQuestions.includes(question.id)) {
+                wrongQuestions.push(question.id);
+            }
+        }
+
+        // 上一题
+        function goToPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion(currentQuestionIndex);
+            }
+        }
+
+        // 下一题
+        function goToNextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion(currentQuestionIndex);
+            }
+        }
+
+        // 切换模式
+        function switchMode(newMode) {
+            mode = newMode;
+            
+            // 更新按钮状态
+            practiceModeBtn.classList.remove('active');
+            examModeBtn.classList.remove('active');
+            reviewModeBtn.classList.remove('active');
+            
+            if (newMode === 'practice') {
+                practiceModeBtn.classList.add('active');
+                wrongQuestionsContainer.style.display = 'none';
+            currentQuestionIndex = 0;
+                loadQuestion(currentQuestionIndex);
+            } else if (newMode === 'exam') {
+                examModeBtn.classList.add('active');
+                wrongQuestionsContainer.style.display = 'none';
+                currentQuestionIndex = 0;
+                userAnswers = {};
+                loadQuestion(currentQuestionIndex);
+            } else if (newMode === 'review') {
+                reviewModeBtn.classList.add('active');
+                loadWrongQuestions();
+                wrongQuestionsContainer.style.display = 'block';
+            }
+        }
+
+        // 加载错题
+        function loadWrongQuestions() {
+            wrongQuestionsContainer.innerHTML = '<h3>错题集</h3>';
+            
+            if (wrongQuestions.length === 0) {
+                wrongQuestionsContainer.innerHTML += '<p>暂无错题</p>';
+                return;
+            }
+            
+            wrongQuestions.forEach(questionId => {
+                const question = questions.find(q => q.id === questionId);
+                if (question) {
+                    const wrongQuestionElement = document.createElement('div');
+                    wrongQuestionElement.className = 'wrong-question';
+                    wrongQuestionElement.innerHTML = `
+                        <div class="question-text">${question.id}.${question.text}</div>
+                        <div class="explanation">正确答案: ${question.answer} | 您的答案: ${userAnswers[question.id]}</div>
+                        <div class="explanation">解析：${question.explanation}</div>
+                    `;
+                    wrongQuestionsContainer.appendChild(wrongQuestionElement);
+                }
+            });
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const correctCount = Object.keys(userAnswers).filter(id => {
+                const question = questions.find(q => q.id === parseInt(id));
+                return question && userAnswers[id] === question.answer;
+            }).length;
+            
+            answeredCountSpan.textContent = answeredCount;
+            
+            const correctRate = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+            correctRateSpan.textContent = `${correctRate}%`;
+            
+            const progress = (answeredCount / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
